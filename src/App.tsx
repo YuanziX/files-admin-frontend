@@ -1,21 +1,15 @@
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
-import { BrowserRouter, Route } from 'react-router-dom'
+import { BrowserRouter, Route } from "react-router-dom";
+import ProtectedRoute from "./utils/routeProtection";
 
-const queryClient = new QueryClient()
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Route path="/home" element={<>
-        </>} />
-        <Route path="/about" element={<>
-        </>} />
-      </BrowserRouter>
-    </QueryClientProvider>
-  )
+    <BrowserRouter>
+      <ProtectedRoute>
+        <Route path="/home" element={<></>} />
+        <Route path="/about" element={<></>} />
+      </ProtectedRoute>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
