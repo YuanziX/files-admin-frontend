@@ -1,26 +1,27 @@
 import { graphql } from "@/__generated__";
 
 export const GET_FILES_QUERY = graphql(`
-  query GetFiles(limit: Int, pageNo: Int) {
+  query GetFiles($limit: Int, $pageNo: Int) {
     getFiles(limit: $limit, pageNo: $pageNo) {
       files {
         id
         ownerID
-        fileName
+        filename
         mimeType
         size
         uploadDate
         downloadCount
       }
       pagination {
-        count: Int!
-        totalCount: Int!
-        pageNo: Int!
-        totalPages: Int!
-        limit: Int!
+        count
+        totalCount
+        pageNo
+        totalPages
+        limit
       }
     }
-  }`);
+  }
+`);
 
 export const DOWNLOAD_FILE_QUERY = graphql(`
   query DownloadFile($fileID: ID!) {

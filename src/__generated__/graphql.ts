@@ -130,6 +130,12 @@ export type GetFilesResponse = {
   pagination: Pagination;
 };
 
+export type GetUsersResponse = {
+  __typename?: 'GetUsersResponse';
+  pagination: Pagination;
+  users: Array<User>;
+};
+
 export type LoginUser = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -281,7 +287,9 @@ export type Query = {
   getFolderShares: Array<Share>;
   getFoldersInFolder: Array<Folder>;
   getMyShares: Array<Share>;
+  getUsageStatsByUser: UsageStat;
   getUserByID: User;
+  getUsers: GetUsersResponse;
   me: User;
   searchFiles: Array<File>;
 };
@@ -306,6 +314,7 @@ export type QueryGetFileSharesArgs = {
 export type QueryGetFilesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   pageNo?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -318,7 +327,7 @@ export type QueryGetFilesInFolderArgs = {
 
 
 export type QueryGetFolderDetailsArgs = {
-  folderId: Scalars['ID']['input'];
+  folderId?: InputMaybe<Scalars['ID']['input']>;
   publicToken?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -336,8 +345,19 @@ export type QueryGetFoldersInFolderArgs = {
 };
 
 
+export type QueryGetUsageStatsByUserArgs = {
+  userID: Scalars['ID']['input'];
+};
+
+
 export type QueryGetUserByIdArgs = {
   userID: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUsersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  pageNo?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -373,6 +393,12 @@ export enum SortOrder {
   Desc = 'DESC'
 }
 
+export type UsageStat = {
+  __typename?: 'UsageStat';
+  actualStorageUsed: Scalars['Int']['output'];
+  totalStorageUsed: Scalars['Int']['output'];
+};
+
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['Time']['output'];
@@ -390,5 +416,47 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthResponse', token: string, user: { __typename?: 'User', name: string } } };
 
+export type GetFilesQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  pageNo?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetFilesQuery = { __typename?: 'Query', getFiles: { __typename?: 'GetFilesResponse', files: Array<{ __typename?: 'AdminFile', id: string, ownerID: string, filename: string, mimeType: string, size: number, uploadDate: any, downloadCount: number }>, pagination: { __typename?: 'Pagination', count: number, totalCount: number, pageNo: number, totalPages: number, limit: number } } };
+
+export type DownloadFileQueryVariables = Exact<{
+  fileID: Scalars['ID']['input'];
+}>;
+
+
+export type DownloadFileQuery = { __typename?: 'Query', downloadFile: { __typename?: 'DownloadFileResponse', url: string, filename: string } };
+
+export type GetUserByIdQueryVariables = Exact<{
+  userID: Scalars['ID']['input'];
+}>;
+
+
+export type GetUserByIdQuery = { __typename?: 'Query', getUserByID: { __typename?: 'User', id: string, name: string, email: string, role: string, createdAt: any } };
+
+export type GetUsersQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  pageNo?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetUsersQuery = { __typename?: 'Query', getUsers: { __typename?: 'GetUsersResponse', users: Array<{ __typename?: 'User', id: string, name: string, email: string, role: string, createdAt: any }>, pagination: { __typename?: 'Pagination', count: number, totalCount: number, pageNo: number, totalPages: number, limit: number } } };
+
+export type GetUsageStatsByUserQueryVariables = Exact<{
+  userID: Scalars['ID']['input'];
+}>;
+
+
+export type GetUsageStatsByUserQuery = { __typename?: 'Query', getUsageStatsByUser: { __typename?: 'UsageStat', totalStorageUsed: number, actualStorageUsed: number } };
+
 
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const GetFilesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFiles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pageNo"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFiles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"pageNo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pageNo"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"files"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ownerID"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}},{"kind":"Field","name":{"kind":"Name","value":"size"}},{"kind":"Field","name":{"kind":"Name","value":"uploadDate"}},{"kind":"Field","name":{"kind":"Name","value":"downloadCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageNo"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}}]}}]}}]} as unknown as DocumentNode<GetFilesQuery, GetFilesQueryVariables>;
+export const DownloadFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DownloadFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fileID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"downloadFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fileID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fileID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}}]}}]}}]} as unknown as DocumentNode<DownloadFileQuery, DownloadFileQueryVariables>;
+export const GetUserByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserByID"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserByID"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<GetUserByIdQuery, GetUserByIdQueryVariables>;
+export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pageNo"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUsers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"pageNo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pageNo"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pagination"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageNo"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}}]}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
+export const GetUsageStatsByUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsageStatsByUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUsageStatsByUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalStorageUsed"}},{"kind":"Field","name":{"kind":"Name","value":"actualStorageUsed"}}]}}]}}]} as unknown as DocumentNode<GetUsageStatsByUserQuery, GetUsageStatsByUserQueryVariables>;

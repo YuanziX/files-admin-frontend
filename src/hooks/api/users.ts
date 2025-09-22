@@ -23,11 +23,11 @@ export const GET_USERS_QUERY = graphql(`
         createdAt
       }
       pagination {
-        count: Int!
-        totalCount: Int!
-        pageNo: Int!
-        totalPages: Int!
-        limit: Int!
+        count
+        totalCount
+        pageNo
+        totalPages
+        limit
       }
     }
   }
@@ -35,7 +35,7 @@ export const GET_USERS_QUERY = graphql(`
 
 export const GET_USER_USAGE_STATS_QUERY = graphql(`
   query GetUsageStatsByUser($userID: ID!) {
-    getUserUsageStats(userID: $userID) {
+    getUsageStatsByUser(userID: $userID) {
       totalStorageUsed
       actualStorageUsed
     }
