@@ -117,11 +117,6 @@ type GetFilesResponse {
   pagination: Pagination!
 }
 
-type GetUsersResponse {
-  pagination: Pagination!
-  users: [User!]!
-}
-
 input LoginUser {
   email: String!
   password: String!
@@ -177,13 +172,11 @@ type Query {
   getFileShares(fileId: ID!): [Share!]!
   getFiles(limit: Int, pageNo: Int): GetFilesResponse!
   getFilesInFolder(filter: FileFilterInput, folderId: ID, publicToken: String, sort: FileSortInput): [File!]!
-  getFolderDetails(folderId: ID, publicToken: String): Folder
+  getFolderDetails(folderId: ID!, publicToken: String): Folder
   getFolderShares(folderId: ID!): [Share!]!
   getFoldersInFolder(filter: FolderFilterInput, folderId: ID, publicToken: String, sort: FolderSortInput): [Folder!]!
   getMyShares: [Share!]!
-  getUsageStatsByUser(userID: ID!): UsageStat!
   getUserByID(userID: ID!): User!
-  getUsers(limit: Int, pageNo: Int): GetUsersResponse!
   me: User!
   searchFiles(query: String!, search: String!): [File!]!
 }
@@ -215,11 +208,6 @@ enum SortOrder {
 }
 
 scalar Time
-
-type UsageStat {
-  actualStorageUsed: Int!
-  totalStorageUsed: Int!
-}
 
 type User {
   createdAt: Time!

@@ -130,12 +130,6 @@ export type GetFilesResponse = {
   pagination: Pagination;
 };
 
-export type GetUsersResponse = {
-  __typename?: 'GetUsersResponse';
-  pagination: Pagination;
-  users: Array<User>;
-};
-
 export type LoginUser = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -287,9 +281,7 @@ export type Query = {
   getFolderShares: Array<Share>;
   getFoldersInFolder: Array<Folder>;
   getMyShares: Array<Share>;
-  getUsageStatsByUser: UsageStat;
   getUserByID: User;
-  getUsers: GetUsersResponse;
   me: User;
   searchFiles: Array<File>;
 };
@@ -326,7 +318,7 @@ export type QueryGetFilesInFolderArgs = {
 
 
 export type QueryGetFolderDetailsArgs = {
-  folderId?: InputMaybe<Scalars['ID']['input']>;
+  folderId: Scalars['ID']['input'];
   publicToken?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -344,19 +336,8 @@ export type QueryGetFoldersInFolderArgs = {
 };
 
 
-export type QueryGetUsageStatsByUserArgs = {
-  userID: Scalars['ID']['input'];
-};
-
-
 export type QueryGetUserByIdArgs = {
   userID: Scalars['ID']['input'];
-};
-
-
-export type QueryGetUsersArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  pageNo?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -391,12 +372,6 @@ export enum SortOrder {
   Asc = 'ASC',
   Desc = 'DESC'
 }
-
-export type UsageStat = {
-  __typename?: 'UsageStat';
-  actualStorageUsed: Scalars['Int']['output'];
-  totalStorageUsed: Scalars['Int']['output'];
-};
 
 export type User = {
   __typename?: 'User';
