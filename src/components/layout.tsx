@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Users, FileText, LogIn } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Users, FileText } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 interface LayoutProps {
     children: ReactNode;
@@ -12,8 +13,9 @@ const Layout = ({ children }: LayoutProps) => {
     const navigation = [
         { name: 'Users', href: '/users', icon: Users },
         { name: 'Files', href: '/files', icon: FileText },
-        { name: 'Logout', href: '/login', icon: LogIn },
     ];
+    const { triggerAuthRefresh } = useAuth()
+    const naviagte = useNavigate()
 
     return (
         <div className="min-h-screen bg-background">
@@ -43,6 +45,13 @@ const Layout = ({ children }: LayoutProps) => {
                                     );
                                 })}
                             </nav>
+                            <button onClick={() => {
+                                localStorage.removeItem("token")
+                                triggerAuthRefresh()
+                                naviagte("/")
+                            }}>
+                                logout
+                            </button>
                         </div>
                     </div>
                 </div>

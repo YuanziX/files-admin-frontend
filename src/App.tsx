@@ -16,7 +16,6 @@ function App() {
           <Route path="/files" element={<Files />} />
         </Routes>
       </ProtectedRoute>
-
     </BrowserRouter>
   );
 }

@@ -1,229 +1,298 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { User } from '@/types/user';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mail, MapPin, Calendar, Phone, Globe, HardDrive, Loader2 } from 'lucide-react';
-import { GET_USER_BY_ID_QUERY, GET_USER_USAGE_STATS_QUERY } from "@/hooks/api/users";
+import { Button } from '@/components/ui/button';
+import {
+    Eye,
+    Mail,
+    MapPin,
+    ChevronLeft,
+    ChevronRight,
+    Users as UsersIcon,
+    Loader2,
+    RefreshCw,
+    AlertCircle
+} from 'lucide-react';
+import Layout from '@/components/layout';
+import UserModal from '@/components/UserModal';
+import { User } from '@/types/user';
+import { GET_USERS_QUERY } from '@/hooks/api/users';
 
-interface UserModalProps {
-    user: User | null;
-    isOpen: boolean;
-    onClose: () => void;
+// Types for GraphQL responses
+interface GetUsersResponse {
+    getUsers: {
+        users: {
+            id: string;
+            name: string;
+            email: string;
+            role: string;
+            createdAt: string;
+        }[];
+        pagination: {
+            count: number;
+            totalCount: number;
+            pageNo: number;
+            totalPages: number;
+            limit: number;
+        };
+    };
 }
 
-interface UserDetails {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    createdAt: string;
+interface GetUsersVariables {
+    limit?: number;
+    pageNo?: number;
 }
 
-interface UserUsageStats {
-    totalStorageUsed: number;
-    actualStorageUsed: number;
+// Extended User type to match your existing User interface
+interface ExtendedUser extends User {
+    createdAt?: string;
 }
 
-const UserModal = ({ user, isOpen, onClose }: UserModalProps) => {
-    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-    const [usageStats, setUsageStats] = useState<UserUsageStats | null>(null);
+const Users = () => {
+    const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(12);
+
+    // GraphQL query for users
     const {
-        data: userDetailsData,
-        loading: userDetailsLoading,
-        error: userDetailsError
-    } = useQuery(GET_USER_BY_ID_QUERY, {
-        variables: { userID: user?.id || '' },
-        skip: !user?.id || !isOpen,
-        onCompleted: (data) => {
-            if (data.getUserByID) {
-                setUserDetails(data.getUserByID);
-            }
-        }
+        data,
+        loading,
+        error,
+        refetch
+    } = useQuery<GetUsersResponse, GetUsersVariables>(GET_USERS_QUERY, {
+        variables: {
+            limit: pageSize,
+            pageNo: currentPage
+        },
+        fetchPolicy: 'cache-and-network',
     });
 
-    const {
-        data: usageStatsData,
-        loading: usageStatsLoading,
-        error: usageStatsError
-    } = useQuery(GET_USER_USAGE_STATS_QUERY, {
-        variables: { userID: user?.id || '' },
-        skip: !user?.id || !isOpen,
-        onCompleted: (data:any) => {
-            if (data.getUserUsageStats) {
-                setUsageStats(data.getUserUsageStats);
-            }
-        }
-    });
-
-    // Reset state when modal closes or user changes
-    useEffect(() => {
-        if (!isOpen || !user) {
-            setUserDetails(null);
-            setUsageStats(null);
-        }
-    }, [isOpen, user]);
-
-    // Helper function to format storage size
-    const formatStorageSize = (bytes: number): string => {
-        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        let size = bytes;
-        let unitIndex = 0;
-
-        while (size >= 1024 && unitIndex < units.length - 1) {
-            size /= 1024;
-            unitIndex++;
-        }
-
-        return `${size.toFixed(2)} ${units[unitIndex]}`;
+    // Transform GraphQL data to match existing User interface
+    const transformUsers = (graphqlUsers: GetUsersResponse['getUsers']['users']): ExtendedUser[] => {
+        return graphqlUsers.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            createdAt: user.createdAt,
+            // Mock data for fields not in GraphQL response
+            phone: '+1 (555) 000-0000',
+            location: 'Remote',
+            status: Math.random() > 0.2 ? 'active' : 'inactive',
+            joinDate: new Date(user.createdAt).toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric'
+            }),
+            bio: `${user.role} with extensive experience in the field.`
+        }));
     };
 
-    // Helper function to format date
-    const formatDate = (dateString: string): string => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    // Get transformed users
+    const users = data ? transformUsers(data.getUsers.users) : [];
+    const pagination = data?.getUsers.pagination;
+
+    const handleViewUser = (user: ExtendedUser) => {
+        setSelectedUser(user);
+        setIsModalOpen(true);
     };
 
-    if (!user) return null;
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedUser(null);
+    };
 
-    const isLoading = userDetailsLoading || usageStatsLoading;
-    const hasError = userDetailsError || usageStatsError;
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleRefresh = () => {
+        refetch();
+    };
+
+    // Loading state
+    if (loading && !data) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+                        <p className="text-muted-foreground">Loading users...</p>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    // Error state
+    if (error && !data) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-4" />
+                        <p className="text-red-600 mb-4">Error loading users</p>
+                        <p className="text-sm text-muted-foreground mb-4">{error.message}</p>
+                        <Button onClick={handleRefresh} variant="outline">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Try Again
+                        </Button>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>User Details</DialogTitle>
-                </DialogHeader>
-
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                        <span className="ml-2">Loading user details...</span>
-                    </div>
-                ) : hasError ? (
-                    <div className="text-center py-8">
-                        <p className="text-red-500 text-sm">
-                            Error loading user details. Please try again.
+        <Layout>
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">Users</h1>
+                        <p className="text-muted-foreground mt-2">
+                            Manage and view all system users
+                            {pagination && (
+                                <span className="ml-2">
+                                    ({pagination.totalCount} total users)
+                                </span>
+                            )}
                         </p>
                     </div>
+                    <Button onClick={handleRefresh} variant="outline" disabled={loading}>
+                        <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                </div>
+
+                {/* Users Grid */}
+                {users.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-8 text-center">
+                            <UsersIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-medium mb-2">No users found</h3>
+                            <p className="text-muted-foreground">
+                                No users available at the moment
+                            </p>
+                        </CardContent>
+                    </Card>
                 ) : (
-                    <div className="space-y-6">
-                        {/* User Header */}
-                        <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center text-white text-xl font-bold">
-                                {(userDetails?.name || user.name).split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-semibold">
-                                    {userDetails?.name || user.name}
-                                </h3>
-                                <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                                    {user.status}
-                                </Badge>
-                            </div>
-                        </div>
-
-                        {/* User Information */}
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
-                                <Mail className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm">
-                                    {userDetails?.email || user.email}
-                                </span>
-                            </div>
-
-                            {user.phone && (
-                                <div className="flex items-center space-x-3">
-                                    <Phone className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm">{user.phone}</span>
-                                </div>
-                            )}
-
-                            <div className="flex items-center space-x-3">
-                                <Globe className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm">
-                                    {userDetails?.role || user.role}
-                                </span>
-                            </div>
-
-                            {user.location && (
-                                <div className="flex items-center space-x-3">
-                                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm">{user.location}</span>
-                                </div>
-                            )}
-
-                            <div className="flex items-center space-x-3">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-sm">
-                                    Joined {userDetails?.createdAt
-                                        ? formatDate(userDetails.createdAt)
-                                        : user.joinDate
-                                    }
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Storage Usage */}
-                        {usageStats && (
-                            <div className="border-t pt-4">
-                                <h4 className="font-medium mb-3 flex items-center">
-                                    <HardDrive className="w-4 h-4 mr-2" />
-                                    Storage Usage
-                                </h4>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-muted-foreground">
-                                            Total Storage Used:
-                                        </span>
-                                        <span className="text-sm font-medium">
-                                            {formatStorageSize(usageStats.totalStorageUsed)}
-                                        </span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {users.map((user) => (
+                            <Card key={user.id} className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-blue-200">
+                                <CardHeader className="pb-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                                {user.name.split(' ').map(n => n[0]).join('')}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <CardTitle className="text-lg truncate">{user.name}</CardTitle>
+                                                <p className="text-sm text-muted-foreground truncate">{user.role}</p>
+                                            </div>
+                                        </div>
+                                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                                            {user.status}
+                                        </Badge>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-muted-foreground">
-                                            Actual Storage Used:
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                        <Mail className="w-4 h-4 flex-shrink-0" />
+                                        <span className="truncate">{user.email}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                                        <span className="truncate">{user.location}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2">
+                                        <span className="text-xs text-muted-foreground">
+                                            Joined {user.joinDate}
                                         </span>
-                                        <span className="text-sm font-medium">
-                                            {formatStorageSize(usageStats.actualStorageUsed)}
-                                        </span>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleViewUser(user)}
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-50"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </Button>
                                     </div>
-
-                                    {/* Storage Usage Bar */}
-                                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                                        <div
-                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                            style={{
-                                                width: `${Math.min(
-                                                    (usageStats.actualStorageUsed / usageStats.totalStorageUsed) * 100,
-                                                    100
-                                                )}%`
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="text-xs text-muted-foreground text-center">
-                                        {((usageStats.actualStorageUsed / usageStats.totalStorageUsed) * 100).toFixed(1)}% used
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Bio */}
-                        {user.bio && (
-                            <div className="border-t pt-4">
-                                <h4 className="font-medium mb-2">Bio</h4>
-                                <p className="text-sm text-muted-foreground">{user.bio}</p>
-                            </div>
-                        )}
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 )}
-            </DialogContent>
-        </Dialog>
+
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-sm text-muted-foreground">
+                                        Showing {(pagination.pageNo - 1) * pagination.limit + 1} to{' '}
+                                        {Math.min(pagination.pageNo * pagination.limit, pagination.totalCount)} of{' '}
+                                        {pagination.totalCount} results
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handlePageChange(pagination.pageNo - 1)}
+                                        disabled={pagination.pageNo <= 1 || loading}
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        Previous
+                                    </Button>
+
+                                    <div className="flex items-center space-x-1">
+                                        {[...Array(Math.min(5, pagination.totalPages))].map((_, index) => {
+                                            const pageNum = pagination.pageNo - 2 + index;
+                                            if (pageNum < 1 || pageNum > pagination.totalPages) return null;
+
+                                            return (
+                                                <Button
+                                                    key={pageNum}
+                                                    variant={pageNum === pagination.pageNo ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => handlePageChange(pageNum)}
+                                                    disabled={loading}
+                                                    className="w-8 h-8 p-0"
+                                                >
+                                                    {pageNum}
+                                                </Button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handlePageChange(pagination.pageNo + 1)}
+                                        disabled={pagination.pageNo >= pagination.totalPages || loading}
+                                    >
+                                        Next
+                                        <ChevronRight className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+
+            {/* User Modal */}
+            <UserModal
+                user={selectedUser}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
+        </Layout>
     );
 };
 
-export default UserModal;
+export default Users;

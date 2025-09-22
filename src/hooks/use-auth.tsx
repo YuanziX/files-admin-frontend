@@ -67,7 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user?.role === "admin") {
         setIsLoggedIn(true);
       } else {
-        toast.error("Only admin users are allowed to log in here.");
         setIsLoggedIn(true);
       }
     } catch (err) {
