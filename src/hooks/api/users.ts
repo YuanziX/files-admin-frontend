@@ -34,8 +34,10 @@ export const GET_USERS_QUERY = graphql(`
 `);
 
 export const GET_USER_USAGE_STATS_QUERY = graphql(`
-  query GetUsageStatsByUser {
-    totalStorageUsed
-    actualStorageUsed
+  query GetUsageStatsByUser($userID: ID!) {
+    getUserUsageStats(userID: $userID) {
+      totalStorageUsed
+      actualStorageUsed
+    }
   }
 `);
