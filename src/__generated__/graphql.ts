@@ -130,6 +130,12 @@ export type GetFilesResponse = {
   pagination: Pagination;
 };
 
+export type GetUsersResponse = {
+  __typename?: 'GetUsersResponse';
+  pagination: Pagination;
+  users: Array<User>;
+};
+
 export type LoginUser = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -281,7 +287,9 @@ export type Query = {
   getFolderShares: Array<Share>;
   getFoldersInFolder: Array<Folder>;
   getMyShares: Array<Share>;
+  getUsageStatsByUser: UsageStat;
   getUserByID: User;
+  getUsers: GetUsersResponse;
   me: User;
   searchFiles: Array<File>;
 };
@@ -336,8 +344,19 @@ export type QueryGetFoldersInFolderArgs = {
 };
 
 
+export type QueryGetUsageStatsByUserArgs = {
+  userID: Scalars['ID']['input'];
+};
+
+
 export type QueryGetUserByIdArgs = {
   userID: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUsersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  pageNo?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -373,6 +392,12 @@ export enum SortOrder {
   Desc = 'DESC'
 }
 
+export type UsageStat = {
+  __typename?: 'UsageStat';
+  actualStorageUsed: Scalars['Int']['output'];
+  totalStorageUsed: Scalars['Int']['output'];
+};
+
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['Time']['output'];
@@ -390,13 +415,5 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthResponse', token: string, user: { __typename?: 'User', name: string } } };
 
-export type GetUserByIdQueryVariables = Exact<{
-  userID: Scalars['ID']['input'];
-}>;
-
-
-export type GetUserByIdQuery = { __typename?: 'Query', getUserByID: { __typename?: 'User', id: string, name: string, email: string, role: string, createdAt: any } };
-
 
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
-export const GetUserByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserByID"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getUserByID"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<GetUserByIdQuery, GetUserByIdQueryVariables>;
