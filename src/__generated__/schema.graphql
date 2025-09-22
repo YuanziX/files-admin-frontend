@@ -1,0 +1,218 @@
+directive @auth on FIELD_DEFINITION
+
+"""
+Directs the executor to defer this fragment when the `if` argument is true or undefined.
+"""
+directive @defer(
+  """Deferred when true or undefined."""
+  if: Boolean = true
+
+  """Unique name"""
+  label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+type AdminFile {
+  downloadCount: Int!
+  filename: String!
+  id: ID!
+  mimeType: String!
+  ownerID: ID!
+  size: Int!
+  uploadDate: Time!
+}
+
+type AuthResponse {
+  token: String!
+  user: User!
+}
+
+input ConfirmUploadInput {
+  filename: String!
+  folderId: ID
+  hash: String!
+  mimeType: String!
+  size: Int!
+}
+
+type ConfirmUploadsResponse {
+  failedUploads: [FailedUpload!]!
+  files: [File!]!
+}
+
+type DownloadFileResponse {
+  filename: String!
+  url: String!
+}
+
+type DownloadURL {
+  downloadURL: String!
+  filename: String!
+}
+
+type FailedUpload {
+  hash: String!
+  reason: String!
+}
+
+type File {
+  filename: String!
+  id: ID!
+  mimeType: String!
+  size: Int!
+  uploadDate: Time!
+}
+
+input FileFilterInput {
+  filename: String
+  maxSize: Int
+  mimeType: String
+  minSize: Int
+  uploadedAfter: Time
+  uploadedBefore: Time
+}
+
+enum FileSortField {
+  FILENAME
+  MIME_TYPE
+  SIZE
+  UPLOAD_DATE
+}
+
+input FileSortInput {
+  field: FileSortField!
+  order: SortOrder!
+}
+
+type Folder {
+  childrenFiles: [File!]!
+  childrenFolders: [Folder!]!
+  createdAt: Time!
+  id: ID!
+  name: String!
+  parentID: ID
+  path: String!
+  realPath: String!
+}
+
+input FolderFilterInput {
+  createdAfter: Time
+  createdBefore: Time
+  name: String
+}
+
+enum FolderSortField {
+  CREATED_AT
+  NAME
+}
+
+input FolderSortInput {
+  field: FolderSortField!
+  order: SortOrder!
+}
+
+type GetFilesResponse {
+  files: [AdminFile!]!
+  pagination: Pagination!
+}
+
+input LoginUser {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  confirmUploads(uploads: [ConfirmUploadInput!]!): ConfirmUploadsResponse!
+  createAdminUser(email: String!, password: String!): String!
+  createFolder(name: String!, parentId: ID): Folder!
+  deleteFile(fileId: ID!): Boolean!
+  deleteFolder(folderId: ID!): Boolean!
+  getDownloadURL(fileId: ID!, publicToken: String): DownloadURL!
+  login(input: LoginUser!): AuthResponse!
+  preUploadCheck(files: [PreUploadFileInput!]!): PreUploadCheckResponse!
+  registerUser(input: RegisterUser!): AuthResponse!
+  revokePubliclyShared(publicToken: ID!): Boolean!
+  shareFilePublic(fileId: ID!): String!
+  shareFileWithUser(email: String!, fileId: ID!): ID!
+  shareFolderPublic(folderId: ID!): String!
+  shareFolderWithUser(email: String!, folderId: ID!): ID!
+  unshareFileWithUser(email: String!, fileId: ID!): Boolean!
+  unshareFolderWithUser(email: String!, folderId: ID!): Boolean!
+}
+
+type Pagination {
+  count: Int!
+  limit: Int!
+  pageNo: Int!
+  totalCount: Int!
+  totalPages: Int!
+}
+
+type PreSignedURL {
+  filename: String!
+  hash: String!
+  uploadURL: String!
+}
+
+type PreUploadCheckResponse {
+  completedFiles: [File!]!
+  newFiles: [PreSignedURL!]!
+}
+
+input PreUploadFileInput {
+  filename: String!
+  folderId: ID
+  hash: String!
+}
+
+type Query {
+  downloadFile(fileID: ID!): DownloadFileResponse!
+  getFile(fileId: ID!, publicToken: String): File
+  getFileShares(fileId: ID!): [Share!]!
+  getFiles(limit: Int, pageNo: Int): GetFilesResponse!
+  getFilesInFolder(filter: FileFilterInput, folderId: ID, publicToken: String, sort: FileSortInput): [File!]!
+  getFolderDetails(folderId: ID, publicToken: String): Folder
+  getFolderShares(folderId: ID!): [Share!]!
+  getFoldersInFolder(filter: FolderFilterInput, folderId: ID, publicToken: String, sort: FolderSortInput): [Folder!]!
+  getMyShares: [Share!]!
+  getUserByID(userID: ID!): User!
+  me: User!
+  searchFiles(query: String!, search: String!): [File!]!
+}
+
+input RegisterUser {
+  email: String!
+  name: String!
+  password: String!
+}
+
+enum Role {
+  admin
+  user
+}
+
+type Share {
+  createdAt: String!
+  downloadCount: Int!
+  id: ID!
+  owner: User!
+  publicToken: String
+  shareType: String!
+  sharedWith: User
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+scalar Time
+
+type User {
+  createdAt: Time!
+  email: String!
+  id: ID!
+  name: String!
+  role: String!
+}
