@@ -7,7 +7,6 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { toast } from "sonner";
 
 type User = {
   name: string;

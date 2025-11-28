@@ -69,7 +69,7 @@ interface FileItem {
 const Files = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(16);
+    const [pageSize] = useState(16);
 
     // GraphQL query for files
     const {

@@ -31,7 +31,6 @@ const UserModal = ({ user, isOpen, onClose }: UserModalProps) => {
 
     // Fetch user details
     const {
-        data: userDetailsData,
         loading: userDetailsLoading,
         error: userDetailsError
     } = useQuery(GET_USER_BY_ID_QUERY, {
@@ -41,7 +40,6 @@ const UserModal = ({ user, isOpen, onClose }: UserModalProps) => {
 
     // Fetch user usage stats
     const {
-        data: usageStatsData,
         loading: usageStatsLoading,
         error: usageStatsError
     } = useQuery(GET_USER_USAGE_STATS_QUERY, {

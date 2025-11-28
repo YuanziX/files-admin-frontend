@@ -53,7 +53,7 @@ const Users = () => {
     const [selectedUser, setSelectedUser] = useState<ExtendedUser | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(12);
+    const [pageSize] = useState(12);
 
     // GraphQL query for users
     const {

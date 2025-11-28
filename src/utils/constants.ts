@@ -1,1 +1,1 @@
-export const BASE_URL = "http://localhost:8888/query";
+export const BASE_URL = "https://assign.nuubflix.qzz.io/query";
